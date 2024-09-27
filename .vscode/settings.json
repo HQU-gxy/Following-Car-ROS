@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "chrono": "cpp",
+        "*.tcc": "cpp",
+        "bitset": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "typeinfo": "cpp"
+    }
+}
