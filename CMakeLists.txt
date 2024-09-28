@@ -1,31 +1,42 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.20)
 project(uwb_localization)
-set(CXX_STANDARD_REQUIRED ON)
+
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
+option(USE_SYSTEM_SERIAL "Use system serial" OFF)
+
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(serial REQUIRED)
+# http://wiki.ros.org/std_msgs
 find_package(std_msgs REQUIRED)
+# https://index.ros.org/p/geometry_msgs/github-ros2-common_interfaces/
 find_package(geometry_msgs REQUIRED)
+# https://aur.archlinux.org/packages/serial
+# https://github.com/wjwwood/serial
+if (USE_SYSTEM_SERIAL)
+  find_package(serial REQUIRED)
+else()
+  add_subdirectory(third-party/serial)
+endif()
 
 add_executable(uwb src/uwb.cpp)
 target_include_directories(uwb PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(uwb rclcpp std_msgs geometry_msgs serial)
+ament_target_dependencies(uwb rclcpp std_msgs geometry_msgs)
+if (USE_SYSTEM_SERIAL)
+  ament_target_dependencies(uwb serial)
+else()
+  target_link_libraries(uwb serial)
+endif()
 
-# add_executable(uwb_shit src/UwbLocation.cpp src/trilateration.cpp)
-# target_include_directories(uwb_shit PUBLIC
-# $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-# $<INSTALL_INTERFACE:include>)
-
-# ament_target_dependencies(uwb_shit rclcpp std_msgs geometry_msgs)
 
 install(TARGETS uwb 
   DESTINATION lib/${PROJECT_NAME})

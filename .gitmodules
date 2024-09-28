@@ -1,0 +1,3 @@
+[submodule "third-party/serial"]
+	path = third-party/serial
+	url = https://github.com/crosstyan/serial
