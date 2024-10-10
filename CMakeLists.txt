@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(uwb_localization)
+project(stupid_car)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -26,19 +26,26 @@ else()
   add_subdirectory(third-party/serial)
 endif()
 
+
+add_executable(car src/shit.cpp)
+target_include_directories(car PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+ament_target_dependencies(car rclcpp geometry_msgs)
+
+
 add_executable(uwb src/uwb.cpp)
 target_include_directories(uwb PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(uwb rclcpp std_msgs geometry_msgs)
+ament_target_dependencies(uwb rclcpp geometry_msgs)
 if (USE_SYSTEM_SERIAL)
   ament_target_dependencies(uwb serial)
 else()
   target_link_libraries(uwb serial)
 endif()
 
-
-install(TARGETS uwb 
+install(TARGETS car uwb
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)

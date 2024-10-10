@@ -1,33 +1,23 @@
 #pragma once
 
 #include <stdint.h>
-
+#include <utility>
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "serial/serial.h"
 
-struct uwbData {
-	uint16_t distance;
-	float degree;
-	bool paused;
-};
-
-class uwb : public rclcpp::Node {
+class Car : public rclcpp::Node {
 public:
-	uwb();
+	Car();
 	void cleanup();
 
 private:
 	rclcpp::TimerBase::SharedPtr timer_;
 	rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
-	std::shared_ptr<serial::Serial> uwbSerial;
+	rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr subscription_;
 
-	std::jthread uwbDataThread;
-	std::atomic_bool running;
-	std::string uwbDataStr;
+	std::pair<float,float> uwbData; // Distance, Degree
 	bool uwbDataAvail;
 
 	void timerCallback();
-	void uwbDataThreadCb();
-	bool parseData(uwbData &data);
 };
