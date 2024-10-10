@@ -8,7 +8,7 @@
 using namespace std::chrono_literals;
 
 constexpr auto uwbDevicePath = "/dev/uwb_module";
-const auto timeOut              = serial::Timeout::simpleTimeout(20);
+const auto timeOut           = serial::Timeout::simpleTimeout(20);
 
 uwb::uwb() : Node("uwb") {
 	try {
@@ -22,8 +22,8 @@ uwb::uwb() : Node("uwb") {
 	uwbDataThread = std::jthread(&uwb::uwbDataThreadCb, this);
 
 	running.store(true);
-	// Create a publisher for control msg
-	publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
+	// Create a publisher for localization msg
+	publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("uwb_loc", 10);
 
 	timer_ = this->create_wall_timer(200ms, std::bind(&uwb::timerCallback, this));
 }
@@ -49,17 +49,8 @@ void uwb::timerCallback() {
 
 		else {
 			RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Distance: %d cm, Degree: %f", data.distance, data.degree);
-
-			// Go forward when the distance is greater than 150cm
-			if (data.distance > 150) {
-				message.linear.x = std::min(data.distance * 0.001, 0.8);
-			}
-			// Go back when the distance is less than 100cm
-			else if (data.distance < 100) {
-				message.linear.x = -0.5;
-			}
-
-			message.angular.z = data.degree * 0.01;
+			message.linear.x  = data.distance / 100.0; // cm to m
+			message.angular.z = data.degree;
 		}
 	}
 	this->publisher_->publish(message);
@@ -78,7 +69,7 @@ void uwb::uwbDataThreadCb() {
 bool uwb::parseData(uwbData &data) {
 	// MPxxxx,tag_id,x_cm,y_cm,distance_cm,range_number,pdoa_deg,aoa_deg,distance_offset_cm,pdoa_offset_deg,A1_distance_cm,key\r\n
 	if (uwbDataAvail) {
- 		// Check if the data is *probably* valid
+		// Check if the data is *probably* valid
 		if (uwbDataStr.starts_with("MP")) {
 			std::stringstream ss(uwbDataStr);
 
@@ -90,11 +81,9 @@ bool uwb::parseData(uwbData &data) {
 			}
 			data.distance = std::stoi(tokens[4]);
 			data.degree   = std::stof(tokens[7]);
-			RCLCPP_INFO(rclcpp::get_logger("paused"), tokens[11].c_str());
 			data.paused = tokens[11].starts_with('0');
 
 			uwbDataAvail = false;
-
 			return true;
 		}
 		uwbDataAvail = false;
