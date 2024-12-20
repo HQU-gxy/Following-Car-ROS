@@ -10,7 +10,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-option(USE_SYSTEM_SERIAL "Use system serial" OFF)
+option(USE_SYSTEM_SERIAL "Use system serial" ON)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -18,6 +18,8 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 # https://index.ros.org/p/geometry_msgs/github-ros2-common_interfaces/
 find_package(geometry_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 # https://aur.archlinux.org/packages/serial
 # https://github.com/wjwwood/serial
 if (USE_SYSTEM_SERIAL)
@@ -31,14 +33,15 @@ add_executable(car src/shit.cpp)
 target_include_directories(car PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(car rclcpp geometry_msgs)
+ament_target_dependencies(car rclcpp geometry_msgs nav2_msgs tf2_ros)
+
 
 
 add_executable(uwb src/uwb.cpp)
 target_include_directories(uwb PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(uwb rclcpp geometry_msgs)
+ament_target_dependencies(uwb rclcpp geometry_msgs tf2_ros)
 if (USE_SYSTEM_SERIAL)
   ament_target_dependencies(uwb serial)
 else()
