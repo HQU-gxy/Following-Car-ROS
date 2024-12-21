@@ -8,8 +8,8 @@
 #include "serial/serial.h"
 
 struct uwbData {
-	uint16_t distance;
-	float degree;
+	uint16_t distance; // In cm
+	float degree;      // In deg
 	bool paused;
 };
 

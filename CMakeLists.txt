@@ -18,6 +18,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 # https://index.ros.org/p/geometry_msgs/github-ros2-common_interfaces/
 find_package(geometry_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 # https://aur.archlinux.org/packages/serial
@@ -33,8 +34,7 @@ add_executable(car src/shit.cpp)
 target_include_directories(car PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(car rclcpp geometry_msgs nav2_msgs tf2_ros)
-
+ament_target_dependencies(car rclcpp geometry_msgs nav2_msgs tf2_ros tf2_geometry_msgs)
 
 
 add_executable(uwb src/uwb.cpp)
@@ -45,11 +45,17 @@ ament_target_dependencies(uwb rclcpp geometry_msgs tf2_ros)
 if (USE_SYSTEM_SERIAL)
   ament_target_dependencies(uwb serial)
 else()
+  target_include_directories(uwb PRIVATE third-party/serial/include)
   target_link_libraries(uwb serial)
 endif()
 
 install(TARGETS car uwb
   DESTINATION lib/${PROJECT_NAME})
+
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

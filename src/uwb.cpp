@@ -7,12 +7,12 @@
 
 using namespace std::chrono_literals;
 
-constexpr auto uwbDevicePath = "/dev/uwb_module";
-const auto timeOut           = serial::Timeout::simpleTimeout(20);
+constexpr auto uwbDevicePath = "/dev/ttyUWB";
 
 uwb::uwb() : Node("uwb") {
 	try {
-		uwbSerial = std::make_shared<serial::Serial>(uwbDevicePath, 115200, timeOut);
+		const auto timeOut = serial::Timeout::simpleTimeout(20);
+		uwbSerial          = std::make_shared<serial::Serial>(uwbDevicePath, 115200, timeOut);
 		// uwbSerial->open();
 	} catch (const serial::IOException &e) {
 		RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Unable to open port: %s", e.what());
@@ -44,13 +44,13 @@ void uwb::timerCallback() {
 	auto message = geometry_msgs::msg::Twist();
 	if (parseData(data)) {
 		if (data.paused) {
-			RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Paused");
+			RCLCPP_DEBUG(get_logger(), "Paused");
 		}
 
 		else {
-			RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Distance: %d cm, Degree: %f", data.distance, data.degree);
-			message.linear.x  = data.distance / 100.0; // cm to m
-			message.angular.z = data.degree;
+			RCLCPP_DEBUG(get_logger(), "Distance: %d cm, Degree: %f", data.distance, data.degree);
+			message.linear.x  = data.distance / 100.0;      // cm to m
+			message.angular.z = data.degree * M_PI / 180.0; // deg to rad
 		}
 	}
 	this->publisher_->publish(message);
@@ -81,7 +81,7 @@ bool uwb::parseData(uwbData &data) {
 			}
 			data.distance = std::stoi(tokens[4]);
 			data.degree   = std::stof(tokens[7]);
-			data.paused = tokens[11].starts_with('0');
+			data.paused   = tokens[11].starts_with('0');
 
 			uwbDataAvail = false;
 			return true;
