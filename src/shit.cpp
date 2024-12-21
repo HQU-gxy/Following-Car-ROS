@@ -32,18 +32,18 @@ void Car::cleanup() {
 }
 
 void Car::timerCallback() {
-	auto ctrl_message = geometry_msgs::msg::Twist();
+	geometry_msgs::msg::Twist ctrl_message;
 	if (uwbDataAvail) {
-		RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Distance: %f cm, Degree: %f", uwbData.first, uwbData.second);
+		RCLCPP_DEBUG(rclcpp::get_logger("rclcpp"), "Distance: %f m, Degree: %f", uwbData.first, uwbData.second);
 		// Go forward when the distance is greater than 150cm
 		if (uwbData.first > 1.5) {
-			ctrl_message.linear.x = std::min(uwbData.first * 0.1, 0.8);
+			ctrl_message.linear.x = std::min(uwbData.first * 0.2, 0.8);
 		}
 		// Go back when the distance is less than 100cm
 		else if (uwbData.first < 1) {
 			ctrl_message.linear.x = -0.5;
 		}
-		ctrl_message.angular.z = uwbData.second * 0.01;
+		ctrl_message.angular.z = uwbData.second * 0.03;
 	}
 	this->publisher_->publish(ctrl_message);
 	uwbDataAvail = false;

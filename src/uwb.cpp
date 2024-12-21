@@ -7,7 +7,7 @@
 
 using namespace std::chrono_literals;
 
-constexpr auto uwbDevicePath = "/dev/uwb_module";
+constexpr auto uwbDevicePath = "/dev/ttyUWB";
 const auto timeOut           = serial::Timeout::simpleTimeout(20);
 
 uwb::uwb() : Node("uwb") {
@@ -44,11 +44,11 @@ void uwb::timerCallback() {
 	auto message = geometry_msgs::msg::Twist();
 	if (parseData(data)) {
 		if (data.paused) {
-			RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Paused");
+			RCLCPP_DEBUG(rclcpp::get_logger("rclcpp"), "Paused");
 		}
 
 		else {
-			RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Distance: %d cm, Degree: %f", data.distance, data.degree);
+			RCLCPP_DEBUG(rclcpp::get_logger("rclcpp"), "Distance: %d cm, Degree: %f", data.distance, data.degree);
 			message.linear.x  = data.distance / 100.0; // cm to m
 			message.angular.z = data.degree;
 		}
@@ -81,7 +81,7 @@ bool uwb::parseData(uwbData &data) {
 			}
 			data.distance = std::stoi(tokens[4]);
 			data.degree   = std::stof(tokens[7]);
-			data.paused = tokens[11].starts_with('0');
+			data.paused   = tokens[11].starts_with('0');
 
 			uwbDataAvail = false;
 			return true;
