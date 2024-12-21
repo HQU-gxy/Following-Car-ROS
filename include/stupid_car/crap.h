@@ -4,7 +4,6 @@
 #include <utility>
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
-#include "serial/serial.h"
 
 class Car : public rclcpp::Node {
 public:

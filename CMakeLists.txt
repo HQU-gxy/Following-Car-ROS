@@ -42,6 +42,7 @@ ament_target_dependencies(uwb rclcpp geometry_msgs)
 if (USE_SYSTEM_SERIAL)
   ament_target_dependencies(uwb serial)
 else()
+  target_include_directories(uwb PRIVATE third-party/serial/include)
   target_link_libraries(uwb serial)
 endif()
 
