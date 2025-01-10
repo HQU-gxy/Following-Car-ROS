@@ -23,12 +23,10 @@ private:
 	rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
 	std::shared_ptr<serial::Serial> uwbSerial;
 
-	std::jthread uwbDataThread;
-	std::atomic_bool running;
 	std::string uwbDataStr;
 	bool uwbDataAvail;
-
-	void timerCallback();
-	void uwbDataThreadCb();
 	bool parseData(uwbData &data);
+
+	void uwbDataThreadCb();
+	void timerCallback();
 };

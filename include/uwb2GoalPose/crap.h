@@ -8,9 +8,9 @@
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
 
-class Car : public rclcpp::Node {
+class uwb2GoalPose : public rclcpp::Node {
 public:
-	Car();
+	uwb2GoalPose();
 	void cleanup();
 
 private:

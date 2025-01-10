@@ -4,12 +4,12 @@
 #include <sstream>
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
-#include "stupid_car/crap.h"
+#include "uwb2GoalPose/crap.h"
 
 using namespace std::chrono_literals;
 
 
-Car::Car() : Node("Car") {
+uwb2GoalPose::uwb2GoalPose() : Node("uwb2GoalPose") {
 	auto onMessage = [this](geometry_msgs::msg::Twist msg) {
 		try {
 			auto distance = msg.linear.x;  // m
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
 
 	rclcpp::init(argc, argv);
 
-	auto node = std::make_unique<Car>();
+	auto node = std::make_unique<uwb2GoalPose>();
 	rclcpp::spin(std::move(node));
 
 	rclcpp::shutdown();

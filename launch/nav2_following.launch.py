@@ -13,7 +13,7 @@ def generate_launch_description():
     pose_publisher = LaunchDescription(
         [
             launch_ros.actions.Node(
-                package="stupid_car", executable="car", output="screen"
+                package="stupid_car", executable="uwb2GaolPose", output="screen"
             )
         ]
     )

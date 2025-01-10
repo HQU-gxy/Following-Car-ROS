@@ -1,0 +1,19 @@
+#pragma once
+
+#include <stdint.h>
+#include <utility>
+#include "rclcpp/rclcpp.hpp"
+#include "geometry_msgs/msg/twist.hpp"
+
+class Car : public rclcpp::Node {
+public:
+	Car();
+	void cleanup();
+
+private:
+	rclcpp::TimerBase::SharedPtr timer_;
+	rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
+	rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr subscription_;
+
+	int lastIsLinear = 0;
+};

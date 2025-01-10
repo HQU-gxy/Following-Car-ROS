@@ -30,11 +30,17 @@ else()
 endif()
 
 
-add_executable(car src/shit.cpp)
+add_executable(uwb2GoalPose src/uwb2GoalPose.cpp)
+target_include_directories(uwb2GoalPose PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+ament_target_dependencies(uwb2GoalPose rclcpp geometry_msgs nav2_msgs tf2_ros tf2_geometry_msgs)
+
+add_executable(car src/car.cpp)
 target_include_directories(car PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(car rclcpp geometry_msgs nav2_msgs tf2_ros tf2_geometry_msgs)
+ament_target_dependencies(car rclcpp geometry_msgs)
 
 
 add_executable(uwb src/uwb.cpp)
@@ -49,7 +55,7 @@ else()
   target_link_libraries(uwb serial)
 endif()
 
-install(TARGETS car uwb
+install(TARGETS uwb2GoalPose uwb car
   DESTINATION lib/${PROJECT_NAME})
 
 install(
