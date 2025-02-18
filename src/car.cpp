@@ -10,11 +10,11 @@ using namespace std::chrono_literals;
 constexpr float ANGULAR_K       = 0.8;
 constexpr float MIN_ANGULAR_VEL = 0.5;
 constexpr float MAX_ANGULAR_VEL = 1;
-constexpr float ANGULAR_TOLER   = 0.3;
+constexpr float ANGULAR_TOLER   = 0.5;
 
 constexpr float LINEAR_K       = 0.2;
 constexpr float MIN_LINEAR_VEL = 0.2;
-constexpr float MAX_LINEAR_VEL = 0.8;
+constexpr float MAX_LINEAR_VEL = 2.0;
 constexpr float REACHED_DIST   = 1.5;
 constexpr float GO_BACK_DIST   = 1.0;
 
@@ -36,27 +36,37 @@ Car::Car() : Node("Car") {
 		RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Distance: %f m, Degree: %f", linear, angular);
 
 
+		// Go forward when the distance is greater than 150cm
+		if (linear > REACHED_DIST) {
+			ctrl_message.linear.x = std::max(MIN_LINEAR_VEL, std::min(linear * LINEAR_K, MAX_LINEAR_VEL));
+		}
+		// Go back when the distance is less than 100cm
+		else if (linear < GO_BACK_DIST) {
+			ctrl_message.linear.x = -0.5;
+		}
+
 		if (angular > ANGULAR_TOLER) {
 			if (!lastIsLinear || lastIsLinear++ >= 3) {
 				lastIsLinear           = 0;
 				ctrl_message.angular.z = std::max(MIN_ANGULAR_VEL, std::min(angular * ANGULAR_K, MAX_ANGULAR_VEL));
+				ctrl_message.linear.x  = 0;
 			}
+		} else if (angular > ANGULAR_TOLER / 2) {
+			lastIsLinear           = 1;
+			ctrl_message.angular.z = std::max(MIN_ANGULAR_VEL, std::min(angular * ANGULAR_K, MAX_ANGULAR_VEL));
 		} else if (angular < -ANGULAR_TOLER) {
 			if (!lastIsLinear || lastIsLinear++ >= 3) {
 				lastIsLinear           = 0;
+				ctrl_message.linear.x  = 0;
 				ctrl_message.angular.z = -std::max(MIN_ANGULAR_VEL, std::min(-angular * ANGULAR_K, MAX_ANGULAR_VEL));
 			}
+		} else if (angular < -ANGULAR_TOLER / 2) {
+			lastIsLinear           = 1;
+			ctrl_message.angular.z = -std::max(MIN_ANGULAR_VEL, std::min(-angular * ANGULAR_K, MAX_ANGULAR_VEL));
 		} else {
 			lastIsLinear = 1;
-			// Go forward when the distance is greater than 150cm
-			if (linear > REACHED_DIST) {
-				ctrl_message.linear.x = std::max(MIN_LINEAR_VEL, std::min(linear * LINEAR_K, MAX_LINEAR_VEL));
-			}
-			// Go back when the distance is less than 100cm
-			else if (linear < GO_BACK_DIST) {
-				ctrl_message.linear.x = -0.5;
-			}
 		}
+
 
 		this->publisher_->publish(ctrl_message);
 	};
