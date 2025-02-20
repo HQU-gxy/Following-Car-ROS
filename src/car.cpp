@@ -46,18 +46,18 @@ Car::Car() : Node("Car") {
 		}
 
 		if (angular > ANGULAR_TOLER) {
+   ctrl_message.linear.x  = 0;
 			if (!lastIsLinear || lastIsLinear++ >= 3) {
 				lastIsLinear           = 0;
 				ctrl_message.angular.z = std::max(MIN_ANGULAR_VEL, std::min(angular * ANGULAR_K, MAX_ANGULAR_VEL));
-				ctrl_message.linear.x  = 0;
 			}
 		} else if (angular > ANGULAR_TOLER / 2) {
 			lastIsLinear           = 1;
 			ctrl_message.angular.z = std::max(MIN_ANGULAR_VEL, std::min(angular * ANGULAR_K, MAX_ANGULAR_VEL));
 		} else if (angular < -ANGULAR_TOLER) {
+   ctrl_message.linear.x  = 0;
 			if (!lastIsLinear || lastIsLinear++ >= 3) {
 				lastIsLinear           = 0;
-				ctrl_message.linear.x  = 0;
 				ctrl_message.angular.z = -std::max(MIN_ANGULAR_VEL, std::min(-angular * ANGULAR_K, MAX_ANGULAR_VEL));
 			}
 		} else if (angular < -ANGULAR_TOLER / 2) {
